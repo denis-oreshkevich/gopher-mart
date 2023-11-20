@@ -15,7 +15,7 @@ const (
 
 	defaultHost = "localhost"
 
-	defaultPort = "8081"
+	defaultPort = "8080"
 
 	defaultAccrualSystemAddress = "http://localhost:8080"
 )

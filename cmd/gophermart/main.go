@@ -50,7 +50,7 @@ func main() {
 	if err := run(ctx, conf); err != nil {
 		logger.Log.Fatal("main error", zap.Error(err))
 	}
-	logger.Log.Info("server Exited Properly")
+	logger.Log.Info("server exited properly")
 }
 
 func run(ctx context.Context, conf *config.Config) error {
@@ -72,10 +72,10 @@ func run(ctx context.Context, conf *config.Config) error {
 
 	accSvc := accsvc.NewService(accrepo, ordSvc, balSvc)
 
-	uApi := uapi.NewController(userSvc)
-	balApi := bapi.NewController(balSvc)
-	ordApi := oapi.NewController(ordSvc)
-	withApi := wapi.NewController(withSvc)
+	uAPI := uapi.NewController(userSvc)
+	balAPI := bapi.NewController(balSvc)
+	ordAPI := oapi.NewController(ordSvc)
+	withAPI := wapi.NewController(withSvc)
 
 	bctx := context.Background()
 	ctx, cancel := context.WithCancel(bctx)
@@ -89,7 +89,7 @@ func run(ctx context.Context, conf *config.Config) error {
 
 	go accSvc.Process(ctx)
 
-	r := setUpRouter(uApi, balApi, ordApi, withApi)
+	r := setUpRouter(uAPI, balAPI, ordAPI, withAPI)
 
 	srv := &http.Server{
 		Addr:    conf.ServerAddress(),
@@ -110,15 +110,15 @@ func run(ctx context.Context, conf *config.Config) error {
 	}
 
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatalf("server Shutdown Failed:%+v", err)
+		log.Fatalf("server shutdown failed:%+v", err)
 	}
 	return nil
 }
 
-func setUpRouter(uApi *uapi.Controller,
-	balApi *bapi.Controller,
-	ordApi *oapi.Controller,
-	withApi *wapi.Controller) *chi.Mux {
+func setUpRouter(uAPI *uapi.Controller,
+	balAPI *bapi.Controller,
+	ordAPI *oapi.Controller,
+	withAPI *wapi.Controller) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
@@ -126,14 +126,14 @@ func setUpRouter(uApi *uapi.Controller,
 	r.Use(api.Auth)
 	r.Route("/api", func(r chi.Router) {
 		r.Route("/user", func(r chi.Router) {
-			r.Post("/register", uApi.HandleRegisterUser)
-			r.Post("/login", uApi.HandleLoginUser)
-			r.Post("/orders", ordApi.HandlePostOrder)
-			r.Get("/orders", ordApi.HandleGetUserOrders)
-			r.Get("/withdrawals", withApi.HandleGetUserWithdrawals)
-			r.Get("/balance", balApi.HandleGetUserBalance)
+			r.Post("/register", uAPI.HandleRegisterUser)
+			r.Post("/login", uAPI.HandleLoginUser)
+			r.Post("/orders", ordAPI.HandlePostOrder)
+			r.Get("/orders", ordAPI.HandleGetUserOrders)
+			r.Get("/withdrawals", withAPI.HandleGetUserWithdrawals)
+			r.Get("/balance", balAPI.HandleGetUserBalance)
 			r.Route("/balance", func(r chi.Router) {
-				r.Post("/withdraw", withApi.HandlePostWithdraw)
+				r.Post("/withdraw", withAPI.HandlePostWithdraw)
 			})
 
 		})
