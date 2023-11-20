@@ -29,7 +29,7 @@ func NewService(repo accrual.Repository,
 }
 
 func (s *Service) Process(ctx context.Context) {
-	ticker := time.NewTicker(500 * time.Minute)
+	ticker := time.NewTicker(3 * time.Second)
 	defer ticker.Stop()
 	for {
 		select {
