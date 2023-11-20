@@ -2,6 +2,7 @@ package order
 
 import (
 	"errors"
+	"fmt"
 	"github.com/denis-oreshkevich/gopher-mart/internal/app/domain/order"
 	"github.com/denis-oreshkevich/gopher-mart/internal/app/logger"
 	osvc "github.com/denis-oreshkevich/gopher-mart/internal/app/service/order"
@@ -85,5 +86,47 @@ func (a *Controller) HandleGetUserOrders(w http.ResponseWriter, r *http.Request)
 }
 
 func isOrderNumberValid(num string) bool {
-	return orderNumberMatcher.MatchString(num)
+	match := orderNumberMatcher.MatchString(num)
+	if !match {
+		logger.Log.Debug(fmt.Sprintf("order number = %s is not match regex", num))
+		return false
+	}
+	luhn := ValidLuhn(num)
+	if !luhn {
+		logger.Log.Debug(fmt.Sprintf("order number = %s is not valid by Luhn", num))
+	}
+	return luhn
+}
+
+func ValidLuhn(number string) bool {
+	p := len(number) % 2
+	sum := calculateLuhnSum(number, p)
+
+	// If the total modulo 10 is not equal to 0, then the number is invalid.
+	if sum%10 != 0 {
+		return false
+	}
+
+	return true
+}
+
+const asciiZero = 48
+
+func calculateLuhnSum(number string, parity int) int64 {
+	var sum int64
+	for i, d := range number {
+		d = d - asciiZero
+		// Double the value of every second digit.
+		if i%2 == parity {
+			d *= 2
+			// If the result of this doubling operation is greater than 9.
+			if d > 9 {
+				// The same final result can be found by subtracting 9 from that result.
+				d -= 9
+			}
+		}
+		// Take the sum of all the digits.
+		sum += int64(d)
+	}
+	return sum
 }

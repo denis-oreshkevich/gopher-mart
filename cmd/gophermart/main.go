@@ -131,8 +131,8 @@ func setUpRouter(uAPI *uapi.Controller,
 			r.Post("/orders", ordAPI.HandlePostOrder)
 			r.Get("/orders", ordAPI.HandleGetUserOrders)
 			r.Get("/withdrawals", withAPI.HandleGetUserWithdrawals)
-			r.Get("/balance", balAPI.HandleGetUserBalance)
 			r.Route("/balance", func(r chi.Router) {
+				r.Get("/", balAPI.HandleGetUserBalance)
 				r.Post("/withdraw", withAPI.HandlePostWithdraw)
 			})
 
