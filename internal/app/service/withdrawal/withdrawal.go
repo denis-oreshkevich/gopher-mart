@@ -11,7 +11,6 @@ import (
 	"github.com/denis-oreshkevich/gopher-mart/internal/app/service/order"
 )
 
-var ErrOrderNotFound = errors.New("order not found")
 var ErrInvalidSum = errors.New("sum in order is negative")
 
 var ErrInsufficientFunds = errors.New("insufficient funds")
@@ -37,14 +36,11 @@ func (s *Service) Withdraw(ctx context.Context, withdraw withdrawal.Withdrawal) 
 	if err != nil {
 		return fmt.Errorf("auth.GetUserID: %w", err)
 	}
-	//num := withdraw.Order
-	//exists, err := s.orderSvc.CheckIsExist(ctx, num, userID)
+	num := withdraw.Order
+	err = s.orderSvc.Create(ctx, num)
 	if err != nil {
-		return fmt.Errorf("orderSvc.CheckIsExist: %w", err)
+		return fmt.Errorf("orderSvc.Create: %w", err)
 	}
-	//if !exists {
-	//	return ErrOrderNotFound
-	//}
 	sum := withdraw.Sum
 	if sum < 0 {
 		return ErrInvalidSum

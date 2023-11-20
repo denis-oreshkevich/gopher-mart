@@ -38,11 +38,6 @@ func (a *Controller) HandlePostWithdraw(w http.ResponseWriter, r *http.Request) 
 	}
 	err = a.svc.Withdraw(ctx, ww)
 	if err != nil {
-		if errors.Is(err, wsvc.ErrOrderNotFound) {
-			logger.Log.Debug(fmt.Sprintf("order not found by num = %s", ww.Order))
-			w.WriteHeader(http.StatusUnprocessableEntity)
-			return
-		}
 		if errors.Is(err, wsvc.ErrInvalidSum) {
 			logger.Log.Debug(fmt.Sprintf("sum is negative, sum = %f", ww.Sum))
 			w.WriteHeader(http.StatusUnprocessableEntity)
