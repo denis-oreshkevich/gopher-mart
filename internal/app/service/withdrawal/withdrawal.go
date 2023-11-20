@@ -37,14 +37,14 @@ func (s *Service) Withdraw(ctx context.Context, withdraw withdrawal.Withdrawal) 
 	if err != nil {
 		return fmt.Errorf("auth.GetUserID: %w", err)
 	}
-	num := withdraw.Order
-	exists, err := s.orderSvc.CheckIsExist(ctx, num, userID)
+	//num := withdraw.Order
+	//exists, err := s.orderSvc.CheckIsExist(ctx, num, userID)
 	if err != nil {
 		return fmt.Errorf("orderSvc.CheckIsExist: %w", err)
 	}
-	if !exists {
-		return ErrOrderNotFound
-	}
+	//if !exists {
+	//	return ErrOrderNotFound
+	//}
 	sum := withdraw.Sum
 	if sum < 0 {
 		return ErrInvalidSum
