@@ -100,7 +100,7 @@ func run(ctx context.Context, conf *config.Config) error {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
-	logger.Log.Info("server Started")
+	logger.Log.Info("server started")
 
 	select {
 	case <-c:
