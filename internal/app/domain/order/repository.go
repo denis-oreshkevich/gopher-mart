@@ -13,5 +13,5 @@ type Repository interface {
 	FindByUserID(ctx context.Context, userID string) ([]Order, error)
 	CheckIsExist(ctx context.Context, orderNum, userID string) (bool, error)
 	StartProcessing(ctx context.Context, limit int) ([]Order, error)
-	UpdateStatusByID(ctx context.Context, id, status string) error
+	UpdateStatusByID(ctx context.Context, id string, acc float64, status string) error
 }

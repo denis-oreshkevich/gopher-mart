@@ -53,6 +53,9 @@ func (a *Controller) HandlePostWithdraw(w http.ResponseWriter, r *http.Request) 
 			w.WriteHeader(http.StatusPaymentRequired)
 			return
 		}
+		logger.Log.Error("svc.Withdraw", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 	w.WriteHeader(http.StatusOK)
 }

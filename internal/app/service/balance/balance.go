@@ -3,8 +3,8 @@ package balance
 import (
 	"context"
 	"fmt"
+	"github.com/denis-oreshkevich/gopher-mart/internal/app/auth"
 	"github.com/denis-oreshkevich/gopher-mart/internal/app/domain/balance"
-	"github.com/denis-oreshkevich/gopher-mart/internal/app/util/auth"
 )
 
 type Service struct {

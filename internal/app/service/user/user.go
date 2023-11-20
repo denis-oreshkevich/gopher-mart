@@ -3,9 +3,9 @@ package user
 import (
 	"context"
 	"fmt"
+	"github.com/denis-oreshkevich/gopher-mart/internal/app/auth"
 	"github.com/denis-oreshkevich/gopher-mart/internal/app/domain/user"
 	"github.com/denis-oreshkevich/gopher-mart/internal/app/service/balance"
-	"github.com/denis-oreshkevich/gopher-mart/internal/app/util/auth"
 )
 
 type Service struct {

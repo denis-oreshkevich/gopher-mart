@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/denis-oreshkevich/gopher-mart/internal/app/auth"
 	"github.com/denis-oreshkevich/gopher-mart/internal/app/domain/order"
 	"github.com/denis-oreshkevich/gopher-mart/internal/app/logger"
-	"github.com/denis-oreshkevich/gopher-mart/internal/app/util/auth"
 )
 
 var ErrOrderCreatedByAnotherUser = errors.New("order created by another user")
@@ -70,6 +70,7 @@ func (s *Service) StartProcessing(ctx context.Context, limit int) ([]order.Order
 	return s.repo.StartProcessing(ctx, limit)
 }
 
-func (s *Service) UpdateStatusByID(ctx context.Context, id, status string) error {
-	return s.repo.UpdateStatusByID(ctx, id, status)
+func (s *Service) UpdateStatusByID(ctx context.Context, id string, acc float64,
+	status string) error {
+	return s.repo.UpdateStatusByID(ctx, id, acc, status)
 }

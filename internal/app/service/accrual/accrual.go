@@ -29,7 +29,7 @@ func NewService(repo accrual.Repository,
 }
 
 func (s *Service) Process(ctx context.Context) {
-	ticker := time.NewTicker(1 * time.Second)
+	ticker := time.NewTicker(500 * time.Minute)
 	defer ticker.Stop()
 	for {
 		select {
@@ -53,6 +53,8 @@ func (s *Service) process(ctx context.Context) {
 	for _, o := range ords {
 		acc, err := s.repo.FindByOrderNum(ctx, o.Number)
 		st := order.StatusProcessed
+		logger.Log.Debug(fmt.Sprintf("processing order num = %s, status = %s, accrual = %f",
+			acc.Order, acc.Status, acc.Accrual))
 		if err != nil {
 			logger.Log.Error("find accrual by order number", zap.Error(err))
 			if errors.Is(err, accrual.ErrOrderNotRegistered) {
@@ -64,14 +66,14 @@ func (s *Service) process(ctx context.Context) {
 			}
 			logger.Log.Debug(fmt.Sprintf("order num = %s set status = %s", o.Number, st))
 		}
-		upErr := s.orderSvc.UpdateStatusByID(ctx, o.ID, st)
+		upErr := s.orderSvc.UpdateStatusByID(ctx, o.ID, acc.Accrual, st)
 		if upErr != nil {
 			logger.Log.Error("update order status", zap.Error(err))
 			continue
 		}
 		refErr := s.balSvc.RefillByUserID(ctx, acc.Accrual, o.UserID)
 		if refErr != nil {
-			logger.Log.Error("update order status", zap.Error(err))
+			logger.Log.Error("refill balance", zap.Error(err))
 			continue
 		}
 	}

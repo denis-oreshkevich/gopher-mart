@@ -2,8 +2,8 @@ package api
 
 import (
 	"context"
+	"github.com/denis-oreshkevich/gopher-mart/internal/app/auth"
 	"github.com/denis-oreshkevich/gopher-mart/internal/app/logger"
-	"github.com/denis-oreshkevich/gopher-mart/internal/app/util/auth"
 	"go.uber.org/zap"
 	"net/http"
 )

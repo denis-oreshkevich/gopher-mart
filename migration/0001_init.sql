@@ -26,7 +26,7 @@ create table if not exists mart.ordr(
     id uuid not null default uuid_generate_v4(),
     num varchar(32) not null,
     status varchar(12) not null default 'NEW',
-    accrual numeric(10, 3),
+    accrual numeric(10, 3) default 0,
     user_id uuid not null,
     uploaded_at timestamp not null default CURRENT_TIMESTAMP,
     constraint ordr_pkey primary key (id),

@@ -64,7 +64,7 @@ func (s *BalanceRepository) RefillByUserID(ctx context.Context, sum float64, use
 
 func (s *BalanceRepository) WithdrawByUserID(ctx context.Context, sum float64, userID string) error {
 	query := "update mart.balance set cur = cur - @amount, " +
-		"withdrawn = amount + @amount  where user_id=@user_id"
+		"withdrawn = withdrawn + @amount  where user_id=@user_id"
 	args := pgx.NamedArgs{
 		"user_id": userID,
 		"amount":  sum,
@@ -76,8 +76,8 @@ func (s *BalanceRepository) WithdrawByUserID(ctx context.Context, sum float64, u
 			if pgerrcode.CheckViolation == pgErr.Code {
 				return fmt.Errorf("%w: %w", balance.ErrCheckConstraint, err)
 			}
-			return fmt.Errorf("db.Exec: %w", err)
 		}
+		return fmt.Errorf("db.Exec: %w", err)
 	}
 	return nil
 }

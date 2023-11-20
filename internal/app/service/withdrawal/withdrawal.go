@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/denis-oreshkevich/gopher-mart/internal/app/auth"
 	"github.com/denis-oreshkevich/gopher-mart/internal/app/domain/balance"
 	"github.com/denis-oreshkevich/gopher-mart/internal/app/domain/withdrawal"
 	balsvc "github.com/denis-oreshkevich/gopher-mart/internal/app/service/balance"
 	"github.com/denis-oreshkevich/gopher-mart/internal/app/service/order"
-	"github.com/denis-oreshkevich/gopher-mart/internal/app/util/auth"
 )
 
 var ErrOrderNotFound = errors.New("order not found")
@@ -49,6 +49,7 @@ func (s *Service) Withdraw(ctx context.Context, withdraw withdrawal.Withdrawal) 
 	if sum < 0 {
 		return ErrInvalidSum
 	}
+
 	err = s.balanceSvc.WithdrawByUserID(ctx, sum, userID)
 	if err != nil {
 		if errors.Is(err, balance.ErrCheckConstraint) {

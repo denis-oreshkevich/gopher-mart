@@ -141,10 +141,12 @@ func (s *OrderRepository) StartProcessing(ctx context.Context, limit int) ([]ord
 	return res, nil
 }
 
-func (s *OrderRepository) UpdateStatusByID(ctx context.Context, id, status string) error {
-	query := "update mart.ordr set status = @status where id = @id"
+func (s *OrderRepository) UpdateStatusByID(ctx context.Context, id string, acc float64,
+	status string) error {
+	query := "update mart.ordr set accrual = @acc, status = @status where id = @id"
 	args := pgx.NamedArgs{
 		"id":     id,
+		"acc":    acc,
 		"status": status,
 	}
 	_, err := s.db.Exec(ctx, query, args)

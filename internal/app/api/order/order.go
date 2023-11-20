@@ -103,11 +103,7 @@ func ValidLuhn(number string) bool {
 	sum := calculateLuhnSum(number, p)
 
 	// If the total modulo 10 is not equal to 0, then the number is invalid.
-	if sum%10 != 0 {
-		return false
-	}
-
-	return true
+	return sum%10 == 0
 }
 
 const asciiZero = 48
