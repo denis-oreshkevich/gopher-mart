@@ -3,10 +3,10 @@ package order
 import "time"
 
 const (
-	NewStatus        = "NEW"        //заказ загружен в систему, но не попал в обработку;
+	StatusNew        = "NEW"        //заказ загружен в систему, но не попал в обработку;
 	ProcessingStatus = "PROCESSING" //вознаграждение за заказ рассчитывается;
-	InvalidStatus    = "INVALID"    //система расчёта вознаграждений отказала в расчёте;
-	ProcessedStatus  = "PROCESSED"  //данные по заказу проверены и информация о расчёте успешно получена.
+	StatusInvalid    = "INVALID"    //система расчёта вознаграждений отказала в расчёте;
+	StatusProcessed  = "PROCESSED"  //данные по заказу проверены и информация о расчёте успешно получена.
 )
 
 //go:generate easyjson -all order.go

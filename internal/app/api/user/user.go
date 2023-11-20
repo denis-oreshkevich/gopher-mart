@@ -71,7 +71,7 @@ func (a *Controller) HandleRegisterUser(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	w.Header().Set(api.AuthorizationHeaderName, token)
-	w.WriteHeader(http.StatusAccepted)
+	w.WriteHeader(http.StatusOK)
 }
 
 func (a *Controller) HandleLoginUser(w http.ResponseWriter, r *http.Request) {

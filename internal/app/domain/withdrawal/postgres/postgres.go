@@ -36,7 +36,7 @@ func (s *WithdrawalRepository) Register(ctx context.Context, withdraw withdrawal
 
 func (s *WithdrawalRepository) FindByUserID(ctx context.Context,
 	userID string) ([]withdrawal.Withdrawal, error) {
-	query := "select amount, processed_at, ordr.num from mart.withdrawal as mw" +
+	query := "select amount, processed_at, mo.num from mart.withdrawal as mw" +
 		"inner join mart.ordr as mo on mw.order_id = mo.id " +
 		"where mo.user_id=@user_id order by processed_at asc"
 	args := pgx.NamedArgs{

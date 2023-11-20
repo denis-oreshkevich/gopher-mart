@@ -65,7 +65,7 @@ func (a *Controller) HandleGetUserOrders(w http.ResponseWriter, r *http.Request)
 	ctx := r.Context()
 	ord, err := a.svc.FindUserOrders(ctx)
 	if err != nil {
-		logger.Log.Error("mart.FindUserOrders", zap.Error(err))
+		logger.Log.Error("svc.FindUserOrders", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

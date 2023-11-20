@@ -1,10 +1,10 @@
 package accrual
 
 const (
-	RegisteredStatus = "REGISTERED" //заказ зарегистрирован, но вознаграждение не рассчитано;
-	InvalidStatus    = "INVALID"    //заказ не принят к расчёту, и вознаграждение не будет начислено;
-	ProcessingStatus = "PROCESSING" //расчёт начисления в процессе;
-	ProcessedStatus  = "PROCESSED"  //расчёт начисления окончен;
+	StatusRegistered = "REGISTERED" //заказ зарегистрирован, но вознаграждение не рассчитано;
+	StatusInvalid    = "INVALID"    //заказ не принят к расчёту, и вознаграждение не будет начислено;
+	StatusProcessing = "PROCESSING" //расчёт начисления в процессе;
+	StatusProcessed  = "PROCESSED"  //расчёт начисления окончен;
 )
 
 //go:generate easyjson -all accrual.go

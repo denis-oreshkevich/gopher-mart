@@ -52,14 +52,14 @@ func (s *Service) process(ctx context.Context) {
 	//TODO tx
 	for _, o := range ords {
 		acc, err := s.repo.FindByOrderNum(ctx, o.Number)
-		st := order.ProcessedStatus
+		st := order.StatusProcessed
 		if err != nil {
 			logger.Log.Error("find accrual by order number", zap.Error(err))
 			if errors.Is(err, accrual.ErrOrderNotRegistered) {
-				st = order.InvalidStatus
+				st = order.StatusInvalid
 			}
 			if errors.Is(err, accrual.ErrTooManyRequests) {
-				st = order.NewStatus
+				st = order.StatusNew
 				//возвращаем статус в новый, чтобы попытаться еще раз
 			}
 			logger.Log.Debug(fmt.Sprintf("order num = %s set status = %s", o.Number, st))

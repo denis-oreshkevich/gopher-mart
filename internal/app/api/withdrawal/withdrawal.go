@@ -61,7 +61,7 @@ func (a *Controller) HandleGetUserWithdrawals(w http.ResponseWriter, r *http.Req
 	ctx := r.Context()
 	ws, err := a.svc.FindUserWithdrawals(ctx)
 	if err != nil {
-		logger.Log.Error("mart.FindUserBalance", zap.Error(err))
+		logger.Log.Error("svc.FindUserWithdrawals", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
