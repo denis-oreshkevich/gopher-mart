@@ -24,7 +24,7 @@ func NewBalanceRepository(db *pgxpool.Pool) *BalanceRepository {
 var _ balance.Repository = (*BalanceRepository)(nil)
 
 func (s *BalanceRepository) Create(ctx context.Context, userID string) error {
-	query := "insert into mart.balance (user_id) values @user_id on conflict do nothing"
+	query := "insert into mart.balance (user_id) values (@user_id) on conflict do nothing"
 	args := pgx.NamedArgs{
 		"user_id": userID,
 	}
