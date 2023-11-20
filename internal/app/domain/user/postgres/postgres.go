@@ -58,5 +58,5 @@ func (s *UserRepository) FindByLogin(ctx context.Context, login string) (user.Us
 		}
 		return user.User{}, fmt.Errorf("row.Scan: %w", err)
 	}
-	return user.User{}, nil
+	return usr, nil
 }

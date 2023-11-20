@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/denis-oreshkevich/gopher-mart/internal/app/domain/user"
-	"github.com/denis-oreshkevich/gopher-mart/internal/app/logger"
 	"github.com/denis-oreshkevich/gopher-mart/internal/app/service/balance"
 	"github.com/denis-oreshkevich/gopher-mart/internal/app/util/auth"
 )
@@ -43,10 +42,8 @@ func (s *Service) Login(ctx context.Context, login, password string) (string, er
 	if err != nil {
 		return "", fmt.Errorf("repo.FindByLogin: %w", err)
 	}
-	logger.Log.Debug(fmt.Sprintf("1 = %s, 2=%s", us.HashedPassword, password))
 	err = auth.ComparePasswords(us.HashedPassword, password)
 	if err != nil {
-		logger.Log.Debug("incorrect passwords")
 		return "", err
 	}
 	token, err := auth.GenerateToken(us.ID)
