@@ -17,12 +17,8 @@ func NewService(repo balance.Repository) *Service {
 	}
 }
 
-func (s *Service) Create(ctx context.Context) error {
-	userID, err := auth.GetUserID(ctx)
-	if err != nil {
-		return fmt.Errorf("auth.GetUserID: %w", err)
-	}
-	err = s.repo.Create(ctx, userID)
+func (s *Service) Create(ctx context.Context, userID string) error {
+	err := s.repo.Create(ctx, userID)
 	if err != nil {
 		return fmt.Errorf("repo.Create: %w", err)
 	}

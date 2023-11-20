@@ -30,7 +30,7 @@ func (s *Service) Register(ctx context.Context, login, password string) (user.Us
 	if err != nil {
 		return user.User{}, fmt.Errorf("repo.Create: %w", err)
 	}
-	err = s.balSvc.Create(ctx)
+	err = s.balSvc.Create(ctx, usr.ID)
 	if err != nil {
 		return user.User{}, fmt.Errorf("balSvc.Create: %w", err)
 	}
