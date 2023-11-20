@@ -8,40 +8,35 @@ import (
 )
 
 const (
-	serverAddressEnvName = "RUN_ADDRESS"
-
-	dataBaseURIEnvName          = "DATABASE_URI"
-	accrualSystemAddressEnvName = "ACCRUAL_SYSTEM_ADDRESS"
-
 	defaultHost = "localhost"
 
-	defaultPort = "8080"
+	defaultPort = "8081"
 
 	defaultAccrualSystemAddress = "http://localhost:8080"
 )
 
-var config Config
+var conf Config
 
 func Get() Config {
-	return config
+	return conf
 }
 
 func Parse() (*Config, error) {
-	flag.StringVar(&config.serverAddress, "a", fmt.Sprintf("%s:%s", defaultHost, defaultPort),
+	flag.StringVar(&conf.ServerAddress, "a", fmt.Sprintf("%s:%s", defaultHost, defaultPort),
 		"HTTP server address")
-	flag.StringVar(&config.dataBaseURI, "d",
+	flag.StringVar(&conf.DataBaseURI, "d",
 		"host=localhost port=5433 user=postgres password=postgres dbname=mart sslmode=disable",
 		"DataBase URI")
-	flag.StringVar(&config.accrualSystemAddress, "r", defaultAccrualSystemAddress,
+	flag.StringVar(&conf.AccrualSystemAddress, "r", defaultAccrualSystemAddress,
 		"Accrual System Address")
 
 	flag.Parse()
-	err := env.Parse(&config)
+	err := env.Parse(&conf)
 	if err != nil {
 		return nil, fmt.Errorf("env.Parse: %w", err)
 	}
 
-	logger.Log.Info(fmt.Sprintf("initializing config %+v", config))
+	logger.Log.Info(fmt.Sprintf("initializing Config %+v", conf))
 
-	return &config, nil
+	return &conf, nil
 }

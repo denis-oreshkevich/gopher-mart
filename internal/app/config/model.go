@@ -1,19 +1,7 @@
 package config
 
 type Config struct {
-	serverAddress        string
-	dataBaseURI          string
-	accrualSystemAddress string
-}
-
-func (c *Config) ServerAddress() string {
-	return c.serverAddress
-}
-
-func (c *Config) DataBaseURI() string {
-	return c.dataBaseURI
-}
-
-func (c *Config) AccrualSystemAddress() string {
-	return c.accrualSystemAddress
+	ServerAddress        string `env:"RUN_ADDRESS"`
+	DataBaseURI          string `env:"DATABASE_URI"`
+	AccrualSystemAddress string `env:"ACCRUAL_SYSTEM_ADDRESS"`
 }

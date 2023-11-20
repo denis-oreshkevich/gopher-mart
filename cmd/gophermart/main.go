@@ -54,7 +54,7 @@ func main() {
 }
 
 func run(ctx context.Context, conf *config.Config) error {
-	pg, err := ipg.New(ctx, conf.DataBaseURI())
+	pg, err := ipg.New(ctx, conf.DataBaseURI)
 	if err != nil {
 		return fmt.Errorf("ipg.New: %w", err)
 	}
@@ -63,7 +63,7 @@ func run(ctx context.Context, conf *config.Config) error {
 	brepo := bp.NewBalanceRepository(pg)
 	orepo := op.NewOrderRepository(pg)
 	wrepo := wp.NewWithdrawalRepository(pg)
-	accrepo := accr.NewAccrualRepository(resty.New(), conf.AccrualSystemAddress())
+	accrepo := accr.NewAccrualRepository(resty.New(), conf.AccrualSystemAddress)
 
 	balSvc := bsvc.NewService(brepo)
 	userSvc := usvc.NewService(urepo, balSvc)
@@ -92,7 +92,7 @@ func run(ctx context.Context, conf *config.Config) error {
 	r := setUpRouter(uAPI, balAPI, ordAPI, withAPI)
 
 	srv := &http.Server{
-		Addr:    conf.ServerAddress(),
+		Addr:    conf.ServerAddress,
 		Handler: r,
 	}
 	go func() {
