@@ -39,7 +39,7 @@ func easyjsonBed2650eDecodeGithubComDenisOreshkevichGopherMartInternalAppDomainB
 		case "current":
 			out.Current = float64(in.Float64())
 		case "withdrawn":
-			out.Withdrawn = int(in.Int())
+			out.Withdrawn = float64(in.Float64())
 		default:
 			in.SkipRecursive()
 		}
@@ -62,7 +62,7 @@ func easyjsonBed2650eEncodeGithubComDenisOreshkevichGopherMartInternalAppDomainB
 	{
 		const prefix string = ",\"withdrawn\":"
 		out.RawString(prefix)
-		out.Int(int(in.Withdrawn))
+		out.Float64(float64(in.Withdrawn))
 	}
 	out.RawByte('}')
 }
