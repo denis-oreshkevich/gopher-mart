@@ -4,26 +4,15 @@ import (
 	"context"
 	"fmt"
 	"github.com/denis-oreshkevich/gopher-mart/internal/app/domain/accrual"
-	"github.com/go-resty/resty/v2"
 	"github.com/mailru/easyjson"
 )
 
-type AccrualRepository struct {
-	client  *resty.Client
-	baseURL string
-}
+var _ accrual.Repository = (*Repository)(nil)
 
-func NewAccrualRepository(client *resty.Client, baseURL string) *AccrualRepository {
-	return &AccrualRepository{
-		client:  client,
-		baseURL: baseURL,
-	}
-}
-
-var _ accrual.Repository = (*AccrualRepository)(nil)
-
-func (a *AccrualRepository) FindByOrderNum(ctx context.Context, num string) (accrual.Accrual, error) {
-	response, err := a.client.R().SetContext(ctx).Get(a.baseURL + `/api/orders/` + num)
+func (r *Repository) FindAccrualByOrderNum(ctx context.Context,
+	num string) (accrual.Accrual, error) {
+	response, err := r.client.R().
+		SetContext(ctx).Get(r.conf.AccrualSystemAddress + `/api/orders/` + num)
 	if err != nil {
 		return accrual.Accrual{}, fmt.Errorf("client.R().Get: %w", err)
 	}

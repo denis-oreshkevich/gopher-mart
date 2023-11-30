@@ -18,9 +18,9 @@ func NewService(repo balance.Repository) *Service {
 }
 
 func (s *Service) Create(ctx context.Context, userID string) error {
-	err := s.repo.Create(ctx, userID)
+	err := s.repo.CreateBalance(ctx, userID)
 	if err != nil {
-		return fmt.Errorf("repo.Create: %w", err)
+		return fmt.Errorf("repo.CreateBalance: %w", err)
 	}
 	return nil
 }
@@ -30,16 +30,9 @@ func (s *Service) FindUserBalance(ctx context.Context) (balance.Balance, error) 
 	if err != nil {
 		return balance.Balance{}, fmt.Errorf("auth.GetUserID: %w", err)
 	}
-	bal, err := s.repo.FindByUserID(ctx, userID)
+	bal, err := s.repo.FindBalanceByUserID(ctx, userID)
 	if err != nil {
-		return balance.Balance{}, fmt.Errorf("repo.FindByUserID: %w", err)
+		return balance.Balance{}, fmt.Errorf("repo.FindBalanceByUserID: %w", err)
 	}
 	return bal, nil
-}
-
-func (s *Service) RefillByUserID(ctx context.Context, sum float64, userID string) error {
-	return s.repo.RefillByUserID(ctx, sum, userID)
-}
-func (s *Service) WithdrawByUserID(ctx context.Context, sum float64, userID string) error {
-	return s.repo.WithdrawByUserID(ctx, sum, userID)
 }

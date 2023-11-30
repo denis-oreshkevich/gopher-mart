@@ -9,28 +9,17 @@ import (
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type OrderRepository struct {
-	db *pgxpool.Pool
-}
+var _ order.Repository = (*Repository)(nil)
 
-func NewOrderRepository(db *pgxpool.Pool) *OrderRepository {
-	return &OrderRepository{
-		db: db,
-	}
-}
-
-var _ order.Repository = (*OrderRepository)(nil)
-
-func (s *OrderRepository) Create(ctx context.Context, orderNum, userID string) error {
+func (r *Repository) CreateOrder(ctx context.Context, orderNum, userID string) error {
 	query := "insert into mart.ordr (num, user_id) values (@num, @user_id)"
 	args := pgx.NamedArgs{
 		"num":     orderNum,
 		"user_id": userID,
 	}
-	_, err := s.db.Exec(ctx, query, args)
+	_, err := r.db.Exec(ctx, query, args)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
@@ -44,13 +33,13 @@ func (s *OrderRepository) Create(ctx context.Context, orderNum, userID string) e
 	return nil
 }
 
-func (s *OrderRepository) FindByNum(ctx context.Context, orderNum string) (order.Order, error) {
+func (r *Repository) FindOrderByNum(ctx context.Context, orderNum string) (order.Order, error) {
 	query := "select num, status, accrual, user_id, uploaded_at " +
 		"from mart.ordr where num = @num"
 	args := pgx.NamedArgs{
 		"num": orderNum,
 	}
-	row := s.db.QueryRow(ctx, query, args)
+	row := r.db.QueryRow(ctx, query, args)
 	var ord order.Order
 	nullFloat := sql.NullFloat64{}
 	err := row.Scan(&ord.Number, &ord.Status, &nullFloat, &ord.UserID, &ord.UploadedAt)
@@ -64,13 +53,13 @@ func (s *OrderRepository) FindByNum(ctx context.Context, orderNum string) (order
 	return ord, nil
 }
 
-func (s *OrderRepository) FindByUserID(ctx context.Context, userID string) ([]order.Order, error) {
+func (r *Repository) FindOrdersByUserID(ctx context.Context, userID string) ([]order.Order, error) {
 	query := "select num, status, accrual, uploaded_at " +
 		"from mart.ordr where user_id = @user_id order by uploaded_at asc"
 	args := pgx.NamedArgs{
 		"user_id": userID,
 	}
-	rows, err := s.db.Query(ctx, query, args)
+	rows, err := r.db.Query(ctx, query, args)
 	if err != nil {
 		return nil, fmt.Errorf("db.Query: %w", err)
 	}
@@ -95,7 +84,7 @@ func (s *OrderRepository) FindByUserID(ctx context.Context, userID string) ([]or
 	return res, nil
 }
 
-func (s *OrderRepository) CheckIsExist(ctx context.Context,
+func (r *Repository) CheckIsOrderExist(ctx context.Context,
 	orderNum, userID string) (bool, error) {
 	query := "select exists(select 1 from mart.ordr " +
 		"where ordr.num = @num and user_id = @user_id)"
@@ -103,7 +92,7 @@ func (s *OrderRepository) CheckIsExist(ctx context.Context,
 		"num":     orderNum,
 		"user_id": userID,
 	}
-	row := s.db.QueryRow(ctx, query, args)
+	row := r.db.QueryRow(ctx, query, args)
 	var ex bool
 	err := row.Scan(&ex)
 	if err != nil {
@@ -112,7 +101,7 @@ func (s *OrderRepository) CheckIsExist(ctx context.Context,
 	return ex, nil
 }
 
-func (s *OrderRepository) StartProcessing(ctx context.Context, limit int) ([]order.Order, error) {
+func (r *Repository) StartOrderProcessing(ctx context.Context, limit int) ([]order.Order, error) {
 	query := "update mart.ordr set status = 'PROCESSING' from " +
 		"(select id, num, status, user_id, uploaded_at from mart.ordr where status = 'NEW' " +
 		"order by uploaded_at asc limit @lim) as sq where ordr.id = sq.id " +
@@ -120,7 +109,7 @@ func (s *OrderRepository) StartProcessing(ctx context.Context, limit int) ([]ord
 	args := pgx.NamedArgs{
 		"lim": limit,
 	}
-	rows, err := s.db.Query(ctx, query, args)
+	rows, err := r.db.Query(ctx, query, args)
 	if err != nil {
 		return nil, fmt.Errorf("db.Query: %w", err)
 	}
@@ -141,7 +130,7 @@ func (s *OrderRepository) StartProcessing(ctx context.Context, limit int) ([]ord
 	return res, nil
 }
 
-func (s *OrderRepository) UpdateStatusByID(ctx context.Context, id string, acc float64,
+func (r *Repository) UpdateOrderStatusByID(ctx context.Context, id string, acc float64,
 	status string) error {
 	query := "update mart.ordr set accrual = @acc, status = @status where id = @id"
 	args := pgx.NamedArgs{
@@ -149,7 +138,7 @@ func (s *OrderRepository) UpdateStatusByID(ctx context.Context, id string, acc f
 		"acc":    acc,
 		"status": status,
 	}
-	_, err := s.db.Exec(ctx, query, args)
+	_, err := r.db.Exec(ctx, query, args)
 	if err != nil {
 		return fmt.Errorf("db.Exec: %w", err)
 	}

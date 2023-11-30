@@ -36,19 +36,25 @@ func (a *Controller) HandlePostWithdraw(w http.ResponseWriter, r *http.Request) 
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	log := logger.Log.With(zap.String("order", ww.Order))
 	err = a.svc.Withdraw(ctx, ww)
 	if err != nil {
+		if errors.Is(err, wsvc.ErrDuplicateOrder) {
+			log.Debug(fmt.Sprintf("duplicate number"))
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			return
+		}
 		if errors.Is(err, wsvc.ErrInvalidSum) {
-			logger.Log.Debug(fmt.Sprintf("sum is negative, sum = %f", ww.Sum))
+			log.Debug(fmt.Sprintf("sum is negative, sum = %f", ww.Sum))
 			w.WriteHeader(http.StatusUnprocessableEntity)
 			return
 		}
 		if errors.Is(err, wsvc.ErrInsufficientFunds) {
-			logger.Log.Debug(fmt.Sprintf("insufficient funds for sum = %f", ww.Sum))
+			log.Debug(fmt.Sprintf("insufficient funds for sum = %f", ww.Sum))
 			w.WriteHeader(http.StatusPaymentRequired)
 			return
 		}
-		logger.Log.Error("svc.Withdraw", zap.Error(err))
+		log.Error("svc.Withdraw", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

@@ -18,16 +18,16 @@ const (
 )
 
 type Controller struct {
-	svc *osvc.Service
+	svc                *osvc.Service
+	orderNumberMatcher *regexp.Regexp
 }
 
 func NewController(svc *osvc.Service) *Controller {
 	return &Controller{
-		svc: svc,
+		svc:                svc,
+		orderNumberMatcher: regexp.MustCompile(orderNumberRegex),
 	}
 }
-
-var orderNumberMatcher = regexp.MustCompile(orderNumberRegex)
 
 func (a *Controller) HandlePostOrder(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -38,7 +38,7 @@ func (a *Controller) HandlePostOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	bStr := string(body)
-	if !isOrderNumberValid(bStr) {
+	if !a.isOrderNumberValid(bStr) {
 		logger.Log.Debug("order number is not valid")
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		return
@@ -85,20 +85,20 @@ func (a *Controller) HandleGetUserOrders(w http.ResponseWriter, r *http.Request)
 	w.Write(result)
 }
 
-func isOrderNumberValid(num string) bool {
-	match := orderNumberMatcher.MatchString(num)
+func (a *Controller) isOrderNumberValid(num string) bool {
+	match := a.orderNumberMatcher.MatchString(num)
 	if !match {
 		logger.Log.Debug(fmt.Sprintf("order number = %s is not match regex", num))
 		return false
 	}
-	luhn := ValidLuhn(num)
+	luhn := validLuhn(num)
 	if !luhn {
 		logger.Log.Debug(fmt.Sprintf("order number = %s is not valid by Luhn", num))
 	}
 	return luhn
 }
 
-func ValidLuhn(number string) bool {
+func validLuhn(number string) bool {
 	p := len(number) % 2
 	sum := calculateLuhnSum(number, p)
 

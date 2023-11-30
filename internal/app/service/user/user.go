@@ -4,19 +4,23 @@ import (
 	"context"
 	"fmt"
 	"github.com/denis-oreshkevich/gopher-mart/internal/app/auth"
+	"github.com/denis-oreshkevich/gopher-mart/internal/app/domain/balance"
 	"github.com/denis-oreshkevich/gopher-mart/internal/app/domain/user"
-	"github.com/denis-oreshkevich/gopher-mart/internal/app/service/balance"
+	"github.com/denis-oreshkevich/gopher-mart/internal/app/repository"
 )
 
 type Service struct {
-	repo   user.Repository
-	balSvc *balance.Service
+	userRepo user.Repository
+	balRepo  balance.Repository
+	tr       repository.Transactor
 }
 
-func NewService(repo user.Repository, balSvc *balance.Service) *Service {
+func NewService(userRepo user.Repository,
+	balRepo balance.Repository, tr repository.Transactor) *Service {
 	return &Service{
-		repo:   repo,
-		balSvc: balSvc,
+		userRepo: userRepo,
+		balRepo:  balRepo,
+		tr:       tr,
 	}
 }
 
@@ -26,21 +30,28 @@ func (s *Service) Register(ctx context.Context, login, password string) (user.Us
 		return user.User{}, fmt.Errorf("util.EncryptPassword: %w", err)
 	}
 	usr := user.New(login, hp)
-	usr, err = s.repo.Create(ctx, usr)
+	err = s.tr.InTransaction(ctx, func(ctx context.Context) error {
+		u, err := s.userRepo.CreateUser(ctx, usr)
+		if err != nil {
+			return fmt.Errorf("userRepo.CreateUser: %w", err)
+		}
+		err = s.balRepo.CreateBalance(ctx, u.ID)
+		if err != nil {
+			return fmt.Errorf("balRepo.CreateBalance: %w", err)
+		}
+		usr = u
+		return nil
+	})
 	if err != nil {
-		return user.User{}, fmt.Errorf("repo.Create: %w", err)
-	}
-	err = s.balSvc.Create(ctx, usr.ID)
-	if err != nil {
-		return user.User{}, fmt.Errorf("balSvc.Create: %w", err)
+		return user.User{}, fmt.Errorf("tr.InTransaction: %w", err)
 	}
 	return usr, nil
 }
 
 func (s *Service) Login(ctx context.Context, login, password string) (string, error) {
-	us, err := s.repo.FindByLogin(ctx, login)
+	us, err := s.userRepo.FindUserByLogin(ctx, login)
 	if err != nil {
-		return "", fmt.Errorf("repo.FindByLogin: %w", err)
+		return "", fmt.Errorf("userRepo.FindUserByLogin: %w", err)
 	}
 	err = auth.ComparePasswords(us.HashedPassword, password)
 	if err != nil {

@@ -26,11 +26,11 @@ func (s *Service) Create(ctx context.Context, orderNum string) error {
 	if err != nil {
 		return fmt.Errorf("auth.GetUserID: %w", err)
 	}
-	err = s.repo.Create(ctx, orderNum, userID)
+	err = s.repo.CreateOrder(ctx, orderNum, userID)
 	if err != nil {
 		if errors.Is(err, order.ErrOrderAlreadyExist) {
 			logger.Log.Debug(fmt.Sprintf("order already exist orderNum = %s", orderNum))
-			ord, errF := s.repo.FindByNum(ctx, orderNum)
+			ord, errF := s.repo.FindOrderByNum(ctx, orderNum)
 			if errF != nil {
 				return fmt.Errorf("st.FindOrderByNum: %w", err)
 			}
@@ -50,27 +50,10 @@ func (s *Service) FindUserOrders(ctx context.Context) (order.Orders, error) {
 	if err != nil {
 		return nil, fmt.Errorf("auth.GetUserID: %w", err)
 	}
-	orders, err := s.repo.FindByUserID(ctx, userID)
+	orders, err := s.repo.FindOrdersByUserID(ctx, userID)
 	if err != nil {
-		return nil, fmt.Errorf("repo.FindByUserID: %w", err)
+		return nil, fmt.Errorf("repo.FindOrdersByUserID: %w", err)
 	}
 	var ord order.Orders = orders
 	return ord, nil
-}
-
-func (s *Service) FindByNum(ctx context.Context, orderNum string) (order.Order, error) {
-	return s.repo.FindByNum(ctx, orderNum)
-}
-
-func (s *Service) CheckIsExist(ctx context.Context, orderNum, userID string) (bool, error) {
-	return s.repo.CheckIsExist(ctx, orderNum, userID)
-}
-
-func (s *Service) StartProcessing(ctx context.Context, limit int) ([]order.Order, error) {
-	return s.repo.StartProcessing(ctx, limit)
-}
-
-func (s *Service) UpdateStatusByID(ctx context.Context, id string, acc float64,
-	status string) error {
-	return s.repo.UpdateStatusByID(ctx, id, acc, status)
 }

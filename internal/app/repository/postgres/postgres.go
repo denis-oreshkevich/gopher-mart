@@ -19,7 +19,39 @@ var (
 	dbErr error
 )
 
-func New(ctx context.Context, dsn string) (*pgxpool.Pool, error) {
+type Repository struct {
+	db *pgxpool.Pool
+}
+
+func NewRepository(ctx context.Context, dsn string) (*Repository, error) {
+	pool, err := initPool(ctx, dsn)
+	if err != nil {
+		return nil, fmt.Errorf("initPool: %w", err)
+	}
+	return &Repository{
+		db: pool,
+	}, nil
+}
+
+func (r *Repository) InTransaction(ctx context.Context,
+	transact func(context.Context) error) error {
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("tx begin. %w", err)
+	}
+	defer tx.Rollback(ctx)
+	err = transact(ctx)
+	if err != nil {
+		return fmt.Errorf("transact: %w", err)
+	}
+	return tx.Commit(ctx)
+}
+
+func (r *Repository) Close() {
+	r.db.Close()
+}
+
+func initPool(ctx context.Context, dsn string) (*pgxpool.Pool, error) {
 	pgOnce.Do(func() {
 		pool, err := pgxpool.New(ctx, dsn)
 		if err != nil {

@@ -10,13 +10,9 @@ import (
 	uapi "github.com/denis-oreshkevich/gopher-mart/internal/app/api/user"
 	wapi "github.com/denis-oreshkevich/gopher-mart/internal/app/api/withdrawal"
 	"github.com/denis-oreshkevich/gopher-mart/internal/app/config"
-	accr "github.com/denis-oreshkevich/gopher-mart/internal/app/domain/accrual/rest"
-	bp "github.com/denis-oreshkevich/gopher-mart/internal/app/domain/balance/postgres"
-	op "github.com/denis-oreshkevich/gopher-mart/internal/app/domain/order/postgres"
-	up "github.com/denis-oreshkevich/gopher-mart/internal/app/domain/user/postgres"
-	wp "github.com/denis-oreshkevich/gopher-mart/internal/app/domain/withdrawal/postgres"
-	ipg "github.com/denis-oreshkevich/gopher-mart/internal/app/infra/postgres"
 	"github.com/denis-oreshkevich/gopher-mart/internal/app/logger"
+	"github.com/denis-oreshkevich/gopher-mart/internal/app/repository/postgres"
+	"github.com/denis-oreshkevich/gopher-mart/internal/app/repository/rest"
 	accsvc "github.com/denis-oreshkevich/gopher-mart/internal/app/service/accrual"
 	bsvc "github.com/denis-oreshkevich/gopher-mart/internal/app/service/balance"
 	osvc "github.com/denis-oreshkevich/gopher-mart/internal/app/service/order"
@@ -31,6 +27,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 )
 
 func main() {
@@ -54,23 +51,19 @@ func main() {
 }
 
 func run(ctx context.Context, conf *config.Config) error {
-	pg, err := ipg.New(ctx, conf.DataBaseURI)
+	pgRepo, err := postgres.NewRepository(ctx, conf.DataBaseURI)
 	if err != nil {
-		return fmt.Errorf("ipg.New: %w", err)
+		return fmt.Errorf("postgres.NewRepository: %w", err)
 	}
-	defer pg.Close()
-	urepo := up.NewUserRepository(pg)
-	brepo := bp.NewBalanceRepository(pg)
-	orepo := op.NewOrderRepository(pg)
-	wrepo := wp.NewWithdrawalRepository(pg)
-	accrepo := accr.NewAccrualRepository(resty.New(), conf.AccrualSystemAddress)
+	defer pgRepo.Close()
+	restRepo := rest.NewRepository(resty.New(), conf)
 
-	balSvc := bsvc.NewService(brepo)
-	userSvc := usvc.NewService(urepo, balSvc)
-	ordSvc := osvc.NewService(orepo)
-	withSvc := wsvc.NewService(wrepo, ordSvc, balSvc)
+	balSvc := bsvc.NewService(pgRepo)
+	userSvc := usvc.NewService(pgRepo, pgRepo, pgRepo)
+	ordSvc := osvc.NewService(pgRepo)
+	withSvc := wsvc.NewService(pgRepo, pgRepo, pgRepo, pgRepo)
 
-	accSvc := accsvc.NewService(accrepo, ordSvc, balSvc)
+	accSvc := accsvc.NewService(restRepo, pgRepo, pgRepo, pgRepo)
 
 	uAPI := uapi.NewController(userSvc)
 	balAPI := bapi.NewController(balSvc)
@@ -80,11 +73,14 @@ func run(ctx context.Context, conf *config.Config) error {
 	bctx := context.Background()
 	ctx, cancel := context.WithCancel(bctx)
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
+	go func() {
+		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 
-	defer func() {
-		signal.Stop(c)
+		<-c
+		logger.Log.Info("cancelling context")
 		cancel()
+
+		close(c)
 	}()
 
 	go accSvc.Process(ctx)
@@ -102,12 +98,8 @@ func run(ctx context.Context, conf *config.Config) error {
 	}()
 	logger.Log.Info("server started")
 
-	select {
-	case <-c:
-		logger.Log.Info("cancelling context")
-		cancel()
-	case <-ctx.Done():
-	}
+	<-ctx.Done()
+	logger.Log.Info("context cancelled")
 
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatalf("server shutdown failed:%+v", err)

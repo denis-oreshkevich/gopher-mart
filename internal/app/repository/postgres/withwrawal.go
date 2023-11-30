@@ -5,36 +5,25 @@ import (
 	"fmt"
 	"github.com/denis-oreshkevich/gopher-mart/internal/app/domain/withdrawal"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type WithdrawalRepository struct {
-	db *pgxpool.Pool
-}
+var _ withdrawal.Repository = (*Repository)(nil)
 
-func NewWithdrawalRepository(db *pgxpool.Pool) *WithdrawalRepository {
-	return &WithdrawalRepository{
-		db: db,
-	}
-}
-
-var _ withdrawal.Repository = (*WithdrawalRepository)(nil)
-
-func (s *WithdrawalRepository) Register(ctx context.Context, withdraw withdrawal.Withdrawal) error {
+func (r *Repository) RegisterWithdrawal(ctx context.Context, withdraw withdrawal.Withdrawal) error {
 	query := "insert into mart.withdrawal (amount ,order_id) values " +
 		"(@amount, (select ordr.id from mart.ordr where ordr.num = @order_num))"
 	args := pgx.NamedArgs{
 		"amount":    withdraw.Sum,
 		"order_num": withdraw.Order,
 	}
-	_, err := s.db.Exec(ctx, query, args)
+	_, err := r.db.Exec(ctx, query, args)
 	if err != nil {
 		return fmt.Errorf("db.Exec: %w", err)
 	}
 	return nil
 }
 
-func (s *WithdrawalRepository) FindByUserID(ctx context.Context,
+func (r *Repository) FindWithdrawalsByUserID(ctx context.Context,
 	userID string) ([]withdrawal.Withdrawal, error) {
 	query := "select amount, processed_at, mo.num from mart.withdrawal as mw " +
 		"inner join mart.ordr as mo on mw.order_id = mo.id " +
@@ -42,7 +31,7 @@ func (s *WithdrawalRepository) FindByUserID(ctx context.Context,
 	args := pgx.NamedArgs{
 		"user_id": userID,
 	}
-	rows, err := s.db.Query(ctx, query, args)
+	rows, err := r.db.Query(ctx, query, args)
 	if err != nil {
 		return nil, fmt.Errorf("db.Query: %w", err)
 	}

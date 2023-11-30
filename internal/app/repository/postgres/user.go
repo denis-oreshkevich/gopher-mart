@@ -8,28 +8,17 @@ import (
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type UserRepository struct {
-	db *pgxpool.Pool
-}
+var _ user.Repository = (*Repository)(nil)
 
-func NewUserRepository(db *pgxpool.Pool) *UserRepository {
-	return &UserRepository{
-		db: db,
-	}
-}
-
-var _ user.Repository = (*UserRepository)(nil)
-
-func (s *UserRepository) Create(ctx context.Context, usr user.User) (user.User, error) {
+func (r *Repository) CreateUser(ctx context.Context, usr user.User) (user.User, error) {
 	query := `insert into mart.usr(login, password) values (@login, @password) returning usr.id`
 	args := pgx.NamedArgs{
 		"login":    usr.Login,
 		"password": usr.HashedPassword,
 	}
-	row := s.db.QueryRow(ctx, query, args)
+	row := r.db.QueryRow(ctx, query, args)
 	err := row.Scan(&usr.ID)
 	if err != nil {
 		var pgErr *pgconn.PgError
@@ -44,12 +33,12 @@ func (s *UserRepository) Create(ctx context.Context, usr user.User) (user.User, 
 	return usr, nil
 }
 
-func (s *UserRepository) FindByLogin(ctx context.Context, login string) (user.User, error) {
+func (r *Repository) FindUserByLogin(ctx context.Context, login string) (user.User, error) {
 	query := `select id, login, password from mart.usr where login=@login`
 	args := pgx.NamedArgs{
 		"login": login,
 	}
-	row := s.db.QueryRow(ctx, query, args)
+	row := r.db.QueryRow(ctx, query, args)
 	var usr user.User
 	err := row.Scan(&usr.ID, &usr.Login, &usr.HashedPassword)
 	if err != nil {
