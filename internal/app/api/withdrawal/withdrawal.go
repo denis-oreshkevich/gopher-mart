@@ -40,7 +40,7 @@ func (a *Controller) HandlePostWithdraw(w http.ResponseWriter, r *http.Request) 
 	err = a.svc.Withdraw(ctx, ww)
 	if err != nil {
 		if errors.Is(err, wsvc.ErrDuplicateOrder) {
-			log.Debug(fmt.Sprintf("duplicate number"))
+			log.Debug("duplicate number")
 			w.WriteHeader(http.StatusUnprocessableEntity)
 			return
 		}
