@@ -30,13 +30,14 @@ func NewService(accRepo accrual.Repository,
 	}
 }
 
-func (s *Service) Process(ctx context.Context) {
+func (s *Service) Process(ctx context.Context, inter chan<- struct{}) {
 	ticker := time.NewTicker(3 * time.Second)
 	defer ticker.Stop()
 	for {
 		select {
 		case <-ctx.Done():
 			logger.Log.Info("interrupt process accruals")
+			inter <- struct{}{}
 			return
 		case <-ticker.C:
 			logger.Log.Info("start process accruals")

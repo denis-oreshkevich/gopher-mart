@@ -73,17 +73,18 @@ func run(ctx context.Context, conf *config.Config) error {
 	bctx := context.Background()
 	ctx, cancel := context.WithCancel(bctx)
 	c := make(chan os.Signal, 1)
+	pc := make(chan struct{}, 1)
 	go func() {
 		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 
 		<-c
 		logger.Log.Info("cancelling context")
 		cancel()
-
 		close(c)
+
 	}()
 
-	go accSvc.Process(ctx)
+	go accSvc.Process(ctx, pc)
 
 	r := setUpRouter(uAPI, balAPI, ordAPI, withAPI)
 
@@ -98,7 +99,7 @@ func run(ctx context.Context, conf *config.Config) error {
 	}()
 	logger.Log.Info("server started")
 
-	<-ctx.Done()
+	<-pc
 	logger.Log.Info("context cancelled")
 
 	if err := srv.Shutdown(ctx); err != nil {

@@ -48,8 +48,8 @@ type OrderMock struct {
 	beforeStartOrderProcessingCounter uint64
 	StartOrderProcessingMock          mOrderMockStartOrderProcessing
 
-	funcUpdateOrderStatusByID          func(ctx context.Context, id string, acc float64, status string) (err error)
-	inspectFuncUpdateOrderStatusByID   func(ctx context.Context, id string, acc float64, status string)
+	funcUpdateOrderStatusByID          func(ctx context.Context, id string, acc float64, status mm_order.Status) (err error)
+	inspectFuncUpdateOrderStatusByID   func(ctx context.Context, id string, acc float64, status mm_order.Status)
 	afterUpdateOrderStatusByIDCounter  uint64
 	beforeUpdateOrderStatusByIDCounter uint64
 	UpdateOrderStatusByIDMock          mOrderMockUpdateOrderStatusByID
@@ -1191,7 +1191,7 @@ type OrderMockUpdateOrderStatusByIDParams struct {
 	ctx    context.Context
 	id     string
 	acc    float64
-	status string
+	status mm_order.Status
 }
 
 // OrderMockUpdateOrderStatusByIDResults contains results of the Repository.UpdateOrderStatusByID
@@ -1200,7 +1200,7 @@ type OrderMockUpdateOrderStatusByIDResults struct {
 }
 
 // Expect sets up expected params for Repository.UpdateOrderStatusByID
-func (mmUpdateOrderStatusByID *mOrderMockUpdateOrderStatusByID) Expect(ctx context.Context, id string, acc float64, status string) *mOrderMockUpdateOrderStatusByID {
+func (mmUpdateOrderStatusByID *mOrderMockUpdateOrderStatusByID) Expect(ctx context.Context, id string, acc float64, status mm_order.Status) *mOrderMockUpdateOrderStatusByID {
 	if mmUpdateOrderStatusByID.mock.funcUpdateOrderStatusByID != nil {
 		mmUpdateOrderStatusByID.mock.t.Fatalf("OrderMock.UpdateOrderStatusByID mock is already set by Set")
 	}
@@ -1220,7 +1220,7 @@ func (mmUpdateOrderStatusByID *mOrderMockUpdateOrderStatusByID) Expect(ctx conte
 }
 
 // Inspect accepts an inspector function that has same arguments as the Repository.UpdateOrderStatusByID
-func (mmUpdateOrderStatusByID *mOrderMockUpdateOrderStatusByID) Inspect(f func(ctx context.Context, id string, acc float64, status string)) *mOrderMockUpdateOrderStatusByID {
+func (mmUpdateOrderStatusByID *mOrderMockUpdateOrderStatusByID) Inspect(f func(ctx context.Context, id string, acc float64, status mm_order.Status)) *mOrderMockUpdateOrderStatusByID {
 	if mmUpdateOrderStatusByID.mock.inspectFuncUpdateOrderStatusByID != nil {
 		mmUpdateOrderStatusByID.mock.t.Fatalf("Inspect function is already set for OrderMock.UpdateOrderStatusByID")
 	}
@@ -1244,7 +1244,7 @@ func (mmUpdateOrderStatusByID *mOrderMockUpdateOrderStatusByID) Return(err error
 }
 
 // Set uses given function f to mock the Repository.UpdateOrderStatusByID method
-func (mmUpdateOrderStatusByID *mOrderMockUpdateOrderStatusByID) Set(f func(ctx context.Context, id string, acc float64, status string) (err error)) *OrderMock {
+func (mmUpdateOrderStatusByID *mOrderMockUpdateOrderStatusByID) Set(f func(ctx context.Context, id string, acc float64, status mm_order.Status) (err error)) *OrderMock {
 	if mmUpdateOrderStatusByID.defaultExpectation != nil {
 		mmUpdateOrderStatusByID.mock.t.Fatalf("Default expectation is already set for the Repository.UpdateOrderStatusByID method")
 	}
@@ -1259,7 +1259,7 @@ func (mmUpdateOrderStatusByID *mOrderMockUpdateOrderStatusByID) Set(f func(ctx c
 
 // When sets expectation for the Repository.UpdateOrderStatusByID which will trigger the result defined by the following
 // Then helper
-func (mmUpdateOrderStatusByID *mOrderMockUpdateOrderStatusByID) When(ctx context.Context, id string, acc float64, status string) *OrderMockUpdateOrderStatusByIDExpectation {
+func (mmUpdateOrderStatusByID *mOrderMockUpdateOrderStatusByID) When(ctx context.Context, id string, acc float64, status mm_order.Status) *OrderMockUpdateOrderStatusByIDExpectation {
 	if mmUpdateOrderStatusByID.mock.funcUpdateOrderStatusByID != nil {
 		mmUpdateOrderStatusByID.mock.t.Fatalf("OrderMock.UpdateOrderStatusByID mock is already set by Set")
 	}
@@ -1279,7 +1279,7 @@ func (e *OrderMockUpdateOrderStatusByIDExpectation) Then(err error) *OrderMock {
 }
 
 // UpdateOrderStatusByID implements order.Repository
-func (mmUpdateOrderStatusByID *OrderMock) UpdateOrderStatusByID(ctx context.Context, id string, acc float64, status string) (err error) {
+func (mmUpdateOrderStatusByID *OrderMock) UpdateOrderStatusByID(ctx context.Context, id string, acc float64, status mm_order.Status) (err error) {
 	mm_atomic.AddUint64(&mmUpdateOrderStatusByID.beforeUpdateOrderStatusByIDCounter, 1)
 	defer mm_atomic.AddUint64(&mmUpdateOrderStatusByID.afterUpdateOrderStatusByIDCounter, 1)
 

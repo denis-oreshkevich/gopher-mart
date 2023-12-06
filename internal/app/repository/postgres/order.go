@@ -131,7 +131,7 @@ func (r *Repository) StartOrderProcessing(ctx context.Context, limit int) ([]ord
 }
 
 func (r *Repository) UpdateOrderStatusByID(ctx context.Context, id string, acc float64,
-	status string) error {
+	status order.Status) error {
 	query := "update mart.ordr set accrual = @acc, status = @status where id = @id"
 	args := pgx.NamedArgs{
 		"id":     id,

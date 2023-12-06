@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/denis-oreshkevich/gopher-mart/internal/app/domain/accrual"
 	"github.com/mailru/easyjson"
+	"net/http"
 )
 
 var _ accrual.Repository = (*Repository)(nil)
@@ -17,11 +18,11 @@ func (r *Repository) FindAccrualByOrderNum(ctx context.Context,
 		return accrual.Accrual{}, fmt.Errorf("client.R().Get: %w", err)
 	}
 	status := response.StatusCode()
-	if status != 200 {
-		if status == 429 {
+	if status != http.StatusOK {
+		if status == http.StatusTooManyRequests {
 			return accrual.Accrual{}, accrual.ErrTooManyRequests
 		}
-		if status >= 204 {
+		if status >= http.StatusNoContent {
 			return accrual.Accrual{}, accrual.ErrOrderNotRegistered
 		}
 		return accrual.Accrual{}, fmt.Errorf("invalid response status = %d", status)

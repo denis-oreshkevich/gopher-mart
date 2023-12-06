@@ -39,7 +39,7 @@ func easyjsonB608c935DecodeGithubComDenisOreshkevichGopherMartInternalAppDomainA
 		case "order":
 			out.Order = string(in.String())
 		case "status":
-			out.Status = string(in.String())
+			out.Status = Status(in.String())
 		case "accrual":
 			out.Accrual = float64(in.Float64())
 		default:

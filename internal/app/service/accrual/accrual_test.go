@@ -42,7 +42,7 @@ func TestService_process(t *testing.T) {
 
 				ordID := uuid.NewString()
 				now := time.Now()
-				ord := order.New(ordID, ordNum, order.StatusNew, uID, 0, now)
+				ord := order.New(ordID, ordNum, uID, order.StatusNew, 0, now)
 				ords := []order.Order{ord}
 				ordRepo := mock.NewOrderMock(mc).StartOrderProcessingMock.
 					Expect(ctx, 3).

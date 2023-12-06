@@ -105,7 +105,7 @@ func easyjson120d1ca2DecodeGithubComDenisOreshkevichGopherMartInternalAppDomainO
 		case "number":
 			out.Number = string(in.String())
 		case "status":
-			out.Status = string(in.String())
+			out.Status = Status(in.String())
 		case "accrual":
 			out.Accrual = float64(in.Float64())
 		case "uploaded_at":
@@ -128,7 +128,12 @@ func easyjson120d1ca2EncodeGithubComDenisOreshkevichGopherMartInternalAppDomainO
 	_ = first
 	{
 		const prefix string = ",\"number\":"
-		out.RawString(prefix[1:])
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(in.Number))
 	}
 	{
